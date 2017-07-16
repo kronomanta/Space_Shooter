@@ -17,7 +17,7 @@ public class GameController : MonoBehaviour
 
     #region GUI
     public UnityEngine.UI.Text ScoreText;
-    public UnityEngine.UI.Text RestartText;
+    public GameObject RestartButton;
     public UnityEngine.UI.Text GameoverText;
     private int _score;
     #endregion
@@ -29,18 +29,15 @@ public class GameController : MonoBehaviour
     {
         _playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
         GameoverText.enabled = false;
-        RestartText.enabled = false;
+        RestartButton.SetActive(false);
 
         UpdateScore();
         StartCoroutine(SpawnWaves());
     }
 
-    private void Update()
+    public void RestartGame()
     {
-        if (_state == State.GameOver && Input.GetKeyDown(KeyCode.R))
-        {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
-        }
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 
     private System.Collections.IEnumerator SpawnWaves()
@@ -61,8 +58,9 @@ public class GameController : MonoBehaviour
                 //}
 
                 Vector3 spawnPosition = new Vector3(Random.Range(-SpawnValues.x, SpawnValues.x), SpawnValues.y, SpawnValues.z);
-                /*GameObject hazard =*/ Instantiate(HazardPrefabs[Random.Range(0, HazardPrefabs.Length)], spawnPosition, Quaternion.identity);
-                
+                /*GameObject hazard =*/
+                Instantiate(HazardPrefabs[Random.Range(0, HazardPrefabs.Length)], spawnPosition, Quaternion.identity);
+
                 //if (flag)
                 //{
                 //    ReverseDirection(hazard);
@@ -74,16 +72,15 @@ public class GameController : MonoBehaviour
             yield return new WaitForSeconds(WaveWaitInSecond);
         }
 
-        //gives the player some time to relax
-        RestartText.enabled = true;
+        
     }
 
     private void ReverseDirection(GameObject clone)
     {
         Quaternion rotation = clone.transform.rotation;
-        clone.transform.rotation = rotation * Quaternion.Euler(0, 180,0); //turn back
+        clone.transform.rotation = rotation * Quaternion.Euler(0, 180, 0); //turn back
         Mover moverScript = clone.GetComponent<Mover>();
-        moverScript.Speed *= -1; 
+        moverScript.Speed *= -1;
     }
 
     private void UpdateScore()
@@ -102,8 +99,25 @@ public class GameController : MonoBehaviour
 
     public void GameOver()
     {
+        RestartButton.SetActive(true);
         GameoverText.enabled = true;
         _state = State.GameOver;
+    }
+
+    private void Update()
+    {
+        if (SystemInfo.deviceType == DeviceType.Desktop)
+        {
+            // Exit condition for Desktop devices
+            if (Input.GetKey("escape"))
+                Application.Quit();
+        }
+        else
+        {
+            // Exit condition for mobile devices
+            if (Input.GetKeyDown(KeyCode.Escape))
+                Application.Quit();
+        }
     }
 
 }

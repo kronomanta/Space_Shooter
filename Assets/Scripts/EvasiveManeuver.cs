@@ -21,7 +21,9 @@ public class EvasiveManeuver : MonoBehaviour {
     private Rigidbody _rigid;
 
 	void Start () {
-        _targetTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        GameObject playerGO = GameObject.FindGameObjectWithTag("Player");
+        if (playerGO != null)
+            _targetTransform = playerGO.transform;
         //_transform = transform;
         _rigid = GetComponent<Rigidbody>();
         _currentSpeed = _rigid.velocity.z;
@@ -30,6 +32,7 @@ public class EvasiveManeuver : MonoBehaviour {
 	}
 	
 	void FixedUpdate () {
+        if (_rigid == null) return;
         float newManeuver = Mathf.MoveTowards(_rigid.velocity.x, _targetManeuver, Time.deltaTime * Smoothing);
         _rigid.velocity = new Vector3(newManeuver, 0, _currentSpeed);
         _rigid.position = new Vector3(Mathf.Clamp(_rigid.position.x, Boundary.XMin, Boundary.XMax), 0, Mathf.Clamp(_rigid.position.z, Boundary.ZMin, Boundary.ZMax));
