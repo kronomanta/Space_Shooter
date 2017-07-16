@@ -4,7 +4,6 @@ public class DestroyByContact : MonoBehaviour
 {
 
     public GameObject Explosion;
-    public GameObject PlayerExplosion;
 
     public int ScoreValue;
     private GameController _gameController = null;
@@ -21,12 +20,14 @@ public class DestroyByContact : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Boundary")) return;
+        if (other.CompareTag("Boundary") || other.CompareTag("Enemy")) return;
 
-        Instantiate(Explosion, transform.position, transform.rotation);
+        if (Explosion != null)
+            Instantiate(Explosion, transform.position, transform.rotation);
+
         if (other.CompareTag("Player"))
         {
-            Instantiate(PlayerExplosion, other.transform.position, other.transform.rotation);
+            other.GetComponent<PlayerController>().Death();
             _gameController.GameOver();
         }
 

@@ -8,7 +8,7 @@ public class GameController : MonoBehaviour
         GameOver
     }
 
-    public GameObject HazardPrefab;
+    public GameObject[] HazardPrefabs;
     public Vector3 SpawnValues;
     public int HazardCount;
     public float SpawnWaitInSecond;
@@ -23,9 +23,11 @@ public class GameController : MonoBehaviour
     #endregion
 
     private State _state = State.Game;
+    private PlayerController _playerController;
 
     private void Start()
     {
+        _playerController = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
         GameoverText.enabled = false;
         RestartText.enabled = false;
 
@@ -50,8 +52,22 @@ public class GameController : MonoBehaviour
 
             for (int i = 0; i < HazardCount; i++)
             {
+                //spawn behind the player:
+
+                //bool flag = Random.value > 0.5f;
+                //if (flag)
+                //{
+                //    SpawnValues.z(16 or - 16)
+                //}
+
                 Vector3 spawnPosition = new Vector3(Random.Range(-SpawnValues.x, SpawnValues.x), SpawnValues.y, SpawnValues.z);
-                Instantiate(HazardPrefab, spawnPosition, Quaternion.identity);
+                /*GameObject hazard =*/ Instantiate(HazardPrefabs[Random.Range(0, HazardPrefabs.Length)], spawnPosition, Quaternion.identity);
+                
+                //if (flag)
+                //{
+                //    ReverseDirection(hazard);
+                //}
+
                 yield return new WaitForSeconds(SpawnWaitInSecond);
             }
 
@@ -60,6 +76,14 @@ public class GameController : MonoBehaviour
 
         //gives the player some time to relax
         RestartText.enabled = true;
+    }
+
+    private void ReverseDirection(GameObject clone)
+    {
+        Quaternion rotation = clone.transform.rotation;
+        clone.transform.rotation = rotation * Quaternion.Euler(0, 180,0); //turn back
+        Mover moverScript = clone.GetComponent<Mover>();
+        moverScript.Speed *= -1; 
     }
 
     private void UpdateScore()
@@ -71,6 +95,9 @@ public class GameController : MonoBehaviour
     {
         _score += score;
         UpdateScore();
+
+        if (score > 0 && _score % 200 == 0)
+            _playerController.IncreaseLevel();
     }
 
     public void GameOver()
